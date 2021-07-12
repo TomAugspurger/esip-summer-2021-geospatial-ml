@@ -26,6 +26,10 @@ jupyterhub:
         # password is set in secrets.yaml
 
   singleuser:
+    image:
+      name: "mcr.microsoft.com/planetary-computer/python"
+      tag: "2021.07.08.0"
+
     extraEnv:
       DASK_GATEWAY__CLUSTER__OPTIONS__IMAGE: '{JUPYTER_IMAGE_SPEC}'
       DASK_DISTRIBUTED__DASHBOARD_LINK: '/user/{JUPYTERHUB_USER}/proxy/{port}/status'
