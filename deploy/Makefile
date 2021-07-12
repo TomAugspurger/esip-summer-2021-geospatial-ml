@@ -1,8 +1,10 @@
-.PHONY: group cluster hub clean
+.PHONY: group cluster hub clean storage
 
 LOCATION?=westeurope
 GROUP?=esip2021
 CLUSTER?=pangeoCluster
+STORAGE_ACCOUNT?=$(GROUP)
+STORAGE_CONTAINER?=$(GROUP)
 MAX_USER_NODE_COUNT?=60
 MAX_WORKER_NODE_COUNT?=100
 
@@ -41,6 +43,16 @@ cluster:
 		--spot-max-price -1 \
 		--labels="k8s.dask.org/dedicated=worker"
 	az aks get-credentials --name $(CLUSTER) --resource-group $(GROUP)
+
+storage:
+	az storage account create \
+		--name=$(STORAGE_ACCOUNT) \
+		--resource-group=$(GROUP) \
+		--location=$(LOCATION)
+	az storage container create \
+		--name=esip2021 \
+		--account-name=$(STORAGE_CONTAINER) \
+		--public-access blob
 
 hub:
 	helm upgrade --wait --install --create-namespace \
