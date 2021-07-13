@@ -37,7 +37,7 @@ jupyterhub:
       - display_name: "GPU"
         description: "Notebook server with a GPU"
         kubespawner_override:
-          image: "mcr.microsoft.com/planetary-computer/gpu-pytorch:2021.07.08.0"
+          image: "mcr.microsoft.com/planetary-computer/gpu-pytorch:2021.07.13.0"
           cpu_guarantee: 3
           cpu_limit: 4
           mem_guarantee: "20G"
