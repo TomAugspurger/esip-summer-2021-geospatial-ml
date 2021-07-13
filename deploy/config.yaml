@@ -51,6 +51,10 @@ jupyterhub:
       DASK_DISTRIBUTED__DASHBOARD_LINK: '/user/{JUPYTERHUB_USER}/proxy/{port}/status'
       DASK_LABEXTENSION__FACTORY__MODULE: 'dask_gateway'
       DASK_LABEXTENSION__FACTORY__CLASS: 'GatewayCluster'
+      NVIDIA_DRIVER_CAPABILITIES: 'compute,utility'
+      # GDAL / Rasterio environment variables for performance
+      GDAL_DISABLE_READDIR_ON_OPEN: "EMPTY_DIR"
+      GDAL_HTTP_MERGE_CONSECUTIVE_RANGES: "YES"
 
 dask-gateway:
   gateway:
