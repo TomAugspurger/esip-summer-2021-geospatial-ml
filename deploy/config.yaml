@@ -29,6 +29,7 @@ jupyterhub:
     image:
       name: "mcr.microsoft.com/planetary-computer/python"
       tag: "2021.07.08.0"
+    startTimeout: 600
 
     profileList:
       - display_name: "CPU"
@@ -36,9 +37,14 @@ jupyterhub:
       - display_name: "GPU"
         description: "Notebook server with a GPU"
         kubespawner_override:
+          image: "mcr.microsoft.com/planetary-computer/gpu-pytorch:2021.07.08.0"
+          cpu_guarantee: 3
+          cpu_limit: 4
+          mem_guarantee: "20G"
+          mem_limit: "28G"
+
           extra_resource_limits:
             nvidia.com/gpu: "1"
-            image: "mcr.microsoft.com/planetary-computer/gpu-pytorch:2021.07.08.0"
 
     extraEnv:
       DASK_GATEWAY__CLUSTER__OPTIONS__IMAGE: '{JUPYTER_IMAGE_SPEC}'
