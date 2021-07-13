@@ -29,6 +29,18 @@ cluster:
 		--node-vm-size Standard_D2s_v3 \
 		--labels hub.jupyter.org/node-purpose=user
 
+	# User GPU pool
+	az aks nodepool add --name gpuuser \
+	    --cluster-name $(CLUSTER) \
+	    --resource-group $(GROUP) \
+	    --node-vm-size Standard_NC4as_T4_v3 \
+	    --enable-cluster-autoscaler \
+	    --node-count 0 \
+	    --min-count=0 --max-count 45 \
+	    --aks-custom-headers UseGPUDedicatedVHD=true \
+	    --labels hub.jupyter.org/node-purpose=user hub.jupyter.org/pool-name=user-alpha-pool \
+	    --node-taints "hub.jupyter.org_dedicated=user:NoSchedule"
+
 	# Add a node-pool for Dask workers.
 	az aks nodepool add \
 		--name workers \

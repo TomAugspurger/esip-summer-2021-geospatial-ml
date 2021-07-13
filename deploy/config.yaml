@@ -30,6 +30,16 @@ jupyterhub:
       name: "mcr.microsoft.com/planetary-computer/python"
       tag: "2021.07.08.0"
 
+    profileList:
+      - display_name: "CPU"
+        description: "Standard notebook server"
+      - display_name: "GPU"
+        description: "Notebook server with a GPU"
+        kubespawner_override:
+          extra_resource_limits:
+            nvidia.com/gpu: "1"
+            image: "mcr.microsoft.com/planetary-computer/gpu-pytorch:2021.07.08.0"
+
     extraEnv:
       DASK_GATEWAY__CLUSTER__OPTIONS__IMAGE: '{JUPYTER_IMAGE_SPEC}'
       DASK_DISTRIBUTED__DASHBOARD_LINK: '/user/{JUPYTERHUB_USER}/proxy/{port}/status'
