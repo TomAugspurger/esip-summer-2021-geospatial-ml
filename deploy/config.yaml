@@ -29,7 +29,7 @@ jupyterhub:
     image:
       name: "mcr.microsoft.com/planetary-computer/python"
       tag: "2021.07.08.0"
-    startTimeout: 600
+    startTimeout: 1200  # 20 * 60s = 10 minutes
 
     profileList:
       - display_name: "CPU"
