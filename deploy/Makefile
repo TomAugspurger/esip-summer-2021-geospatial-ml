@@ -7,7 +7,7 @@ STORAGE_ACCOUNT?=$(GROUP)
 STORAGE_CONTAINER?=$(GROUP)
 MAX_USER_NODE_COUNT?=60
 MAX_WORKER_NODE_COUNT?=100
-
+NODE_COUNT?=0
 
 group:
 	az group create --name $(GROUP) --location $(LOCATION)
@@ -42,7 +42,7 @@ cluster:
 	    --node-taints "hub.jupyter.org_dedicated=user:NoSchedule"
 
 	# User GPU pool
-	az aks nodepool add --name gpuusermanual \
+	az aks nodepool add --name gpumanual \
 	    --cluster-name $(CLUSTER) \
 	    --resource-group $(GROUP) \
 	    --node-vm-size Standard_NC4as_T4_v3 \
@@ -83,6 +83,13 @@ hub:
 		--namespace=dhub \
 		--values=config.yaml \
 		--values=secrets.yaml
+
+scale:
+	az aks nodepool scale \
+		--name=gpumanual \
+		--cluster-name=$(CLUSTER) \
+		--resource-group=$(GROUP) \
+		--node-count=$(NODE_COUNT)
 
 clean:
 	az group delete -n $(GROUP)
