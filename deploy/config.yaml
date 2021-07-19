@@ -42,6 +42,17 @@ jupyterhub:
       limits:
         nvidia.com/gpu: 1
 
+    lifecycleHooks:
+      postStart:
+        exec:
+          command:
+            [
+              "gitpuller",
+              "https://github.com/TomAugspurger/esip-summer-2021-geospatial-ml",
+              "main",
+              "workshop",
+            ]
+
     extraEnv:
       DASK_GATEWAY__CLUSTER__OPTIONS__IMAGE: '{JUPYTER_IMAGE_SPEC}'
       DASK_DISTRIBUTED__DASHBOARD__LINK: '/user/{JUPYTERHUB_USER}/proxy/{port}/status'
@@ -51,6 +62,7 @@ jupyterhub:
       # GDAL / Rasterio environment variables for performance
       GDAL_DISABLE_READDIR_ON_OPEN: "EMPTY_DIR"
       GDAL_HTTP_MERGE_CONSECUTIVE_RANGES: "YES"
+      GDAL_HTTP_MAX_RETRY: "5"
 
 dask-gateway:
   gateway:
