@@ -48,7 +48,7 @@ jupyterhub:
         exec:
           command:
             [
-              "gitpuller",
+              "/srv/conda/envs/notebook/bin/gitpuller",
               "https://github.com/TomAugspurger/esip-summer-2021-geospatial-ml",
               "main",
               "workshop",
