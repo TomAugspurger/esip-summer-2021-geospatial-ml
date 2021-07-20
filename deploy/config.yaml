@@ -42,6 +42,7 @@ jupyterhub:
       limits:
         nvidia.com/gpu: 1
 
+    defaultUrl: "/lab/tree/workshop/index.ipynb"
     lifecycleHooks:
       postStart:
         exec:
