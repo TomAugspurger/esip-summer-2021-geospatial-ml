@@ -34,13 +34,24 @@ jupyterhub:
       guarantee: 3
       limit: 4
     memory:
-      guarantee: "20G"
-      limit: "28G"
-    extraResource:
-      guarantees:
-        nvidia.com/gpu: 1
-      limits:
-        nvidia.com/gpu: 1
+      guarantee: "12G"
+      limit: "24G"
+
+    extraNodeAffinity:
+      preferred:
+        - weight: 1
+          preference:
+            matchExpressions:
+            - key: computetype
+              operator: In
+              values:
+              - gpu
+
+    # extraResource:
+    #   guarantees:
+    #     nvidia.com/gpu: 1
+    #   limits:
+    #     nvidia.com/gpu: 1
 
     defaultUrl: "/lab/tree/workshop/index.ipynb"
     lifecycleHooks:

@@ -24,17 +24,38 @@ NODE_COUNT?=0
 group:
 	az group create --name $(GROUP) --location $(LOCATION)
 
-ncpool:
+userpools:
+	# NC4as_T4_v3
+	az aks nodepool add --name gpumanual \
+	    --cluster-name $(CLUSTER) \
+	    --resource-group $(GROUP) \
+	    --node-vm-size Standard_NC4as_T4_v3 \
+	    --node-count 0 \
+	    --aks-custom-headers UseGPUDedicatedVHD=true \
+	    --labels hub.jupyter.org/node-purpose=user hub.jupyter.org/pool-name=user-alpha-pool computetype=gpu \
+	    --node-taints "hub.jupyter.org_dedicated=user:NoSchedule"
+
 	# Backup in case we don't get enough NCasT4
+	# Standard_NC6
 	az aks nodepool add --name ncgpuuser \
 	    --cluster-name $(CLUSTER) \
 	    --resource-group $(GROUP) \
 	    --node-vm-size Standard_NC6 \
 	    --node-count 0 \
 	    --aks-custom-headers UseGPUDedicatedVHD=true \
-	    --labels hub.jupyter.org/node-purpose=user hub.jupyter.org/pool-name=user-alpha-pool \
+	    --labels hub.jupyter.org/node-purpose=user hub.jupyter.org/pool-name=user-alpha-pool computetype=gpu \
 	    --node-taints "hub.jupyter.org_dedicated=user:NoSchedule"
 
+	# Add a node-pool: one for the users and Dask schedulers
+	az aks nodepool add \
+		--name users \
+		--cluster-name $(CLUSTER) \
+		--resource-group $(GROUP) \
+		--enable-cluster-autoscaler \
+		--node-count 1 \
+		--min-count 0 --max-count 80 \
+		--node-vm-size Standard_D4s_v3 \
+		--labels hub.jupyter.org/node-purpose=user computetype=cpu
 
 cluster:
 	az aks create --resource-group $(GROUP) --name $(CLUSTER) --generate-ssh-keys \
