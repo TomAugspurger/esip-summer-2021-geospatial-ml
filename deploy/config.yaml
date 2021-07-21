@@ -3,13 +3,13 @@ jupyterhub:
     https:
       enabled: true
       hosts:
-        - "esip2021.westeurope.cloudapp.azure.com"
+        - "esip2021cpu.westeurope.cloudapp.azure.com"
       letsencrypt:
         contactEmail: "taugspurger@microsoft.com"
     service:
       annotations:
         # Update this with your hub's name.
-        service.beta.kubernetes.io/azure-dns-label-name: "esip2021"
+        service.beta.kubernetes.io/azure-dns-label-name: "esip2021cpu"
 
   hub:
     # Disable hub network Policy, so that the dask gateway server API can reach the hub directly
@@ -47,11 +47,11 @@ jupyterhub:
               values:
               - gpu
 
-    extraResource:
-      # guarantees:
-      #   nvidia.com/gpu: 1
-      limits:
-        nvidia.com/gpu: 1
+    # extraResource:
+    #   # guarantees:
+    #   #   nvidia.com/gpu: 1
+    #   limits:
+    #     nvidia.com/gpu: 1
 
     defaultUrl: "/lab/tree/workshop/index.ipynb"
     lifecycleHooks:
