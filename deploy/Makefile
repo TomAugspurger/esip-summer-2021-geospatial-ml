@@ -9,8 +9,32 @@ MAX_USER_NODE_COUNT?=60
 MAX_WORKER_NODE_COUNT?=100
 NODE_COUNT?=0
 
+# nodegroup math: We have 100 attendees, we want 100 GPUs
+# Doc pages
+# NC4as_T4_v3: https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series
+# | SKU                             | Quota | CPU/GPU | Users
+# | --------------------------------| ------| ------- | -----
+# | Standard NC Family vCPUs        | 48    | 6       | 8
+# | Standard NCASv3_T4 Family vCPUs | 128   | 4       | 32
+# | Standard NCSv2 Family vCPUs     | 0/0   | 6       |
+# | Standard NCSv3 Family vCPUs     | 0/0   | 6       |
+
+# So we need 60 more. Or 30 NCSv2 + 30 NCSv3
+
 group:
 	az group create --name $(GROUP) --location $(LOCATION)
+
+ncpool:
+	# Backup in case we don't get enough NCasT4
+	az aks nodepool add --name ncgpuuser \
+	    --cluster-name $(CLUSTER) \
+	    --resource-group $(GROUP) \
+	    --node-vm-size Standard_NC6 \
+	    --node-count 0 \
+	    --aks-custom-headers UseGPUDedicatedVHD=true \
+	    --labels hub.jupyter.org/node-purpose=user hub.jupyter.org/pool-name=user-alpha-pool \
+	    --node-taints "hub.jupyter.org_dedicated=user:NoSchedule"
+
 
 cluster:
 	az aks create --resource-group $(GROUP) --name $(CLUSTER) --generate-ssh-keys \
@@ -90,6 +114,14 @@ scale:
 		--cluster-name=$(CLUSTER) \
 		--resource-group=$(GROUP) \
 		--node-count=$(NODE_COUNT)
+
+ncscale:
+	az aks nodepool scale \
+		--name=ncgpuuser \
+		--cluster-name=$(CLUSTER) \
+		--resource-group=$(GROUP) \
+		--node-count=$(NODE_COUNT)
+
 
 clean:
 	az group delete -n $(GROUP)
