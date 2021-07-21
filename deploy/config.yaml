@@ -47,11 +47,11 @@ jupyterhub:
               values:
               - gpu
 
-    # extraResource:
-    #   guarantees:
-    #     nvidia.com/gpu: 1
-    #   limits:
-    #     nvidia.com/gpu: 1
+    extraResource:
+      # guarantees:
+      #   nvidia.com/gpu: 1
+      limits:
+        nvidia.com/gpu: 1
 
     defaultUrl: "/lab/tree/workshop/index.ipynb"
     lifecycleHooks:

@@ -8,6 +8,7 @@ STORAGE_CONTAINER?=$(GROUP)
 MAX_USER_NODE_COUNT?=60
 MAX_WORKER_NODE_COUNT?=100
 NODE_COUNT?=0
+SUBSCRIPTION="Planetary Computer"
 
 # nodegroup math: We have 100 attendees, we want 100 GPUs
 # Doc pages
@@ -47,13 +48,20 @@ userpools:
 	    --node-taints "hub.jupyter.org_dedicated=user:NoSchedule"
 
 	# Add a node-pool: one for the users and Dask schedulers
+	# az aks nodepool add \
+	# 	--name cpumanual \
+	# 	--cluster-name $(CLUSTER) \
+	# 	--resource-group $(GROUP) \
+	# 	--node-count 0 \
+	# 	--node-vm-size Standard_D4s_v3 \
+	# 	--labels hub.jupyter.org/node-purpose=user computetype=cpu
+
+	# Add a node-pool: one for the users and Dask schedulers
 	az aks nodepool add \
 		--name users \
 		--cluster-name $(CLUSTER) \
 		--resource-group $(GROUP) \
-		--enable-cluster-autoscaler \
-		--node-count 1 \
-		--min-count 0 --max-count 80 \
+		--node-count 0 \
 		--node-vm-size Standard_D4s_v3 \
 		--labels hub.jupyter.org/node-purpose=user computetype=cpu
 
@@ -62,53 +70,6 @@ cluster:
 		--node-count=1 \
 		--nodepool-name core \
 		--nodepool-labels hub.jupyter.org/node-purpose=core
-
-	# Add a node-pool: one for the users and Dask schedulers
-	az aks nodepool add \
-		--name users \
-		--cluster-name $(CLUSTER) \
-		--resource-group $(GROUP) \
-		--enable-cluster-autoscaler \
-		--node-count 1 \
-		--min-count 0 --max-count $(MAX_USER_NODE_COUNT) \
-		--node-vm-size Standard_D2s_v3 \
-		--labels hub.jupyter.org/node-purpose=user
-
-	# User GPU pool
-	az aks nodepool add --name gpuuser \
-	    --cluster-name $(CLUSTER) \
-	    --resource-group $(GROUP) \
-	    --node-vm-size Standard_NC4as_T4_v3 \
-	    --enable-cluster-autoscaler \
-	    --node-count 0 \
-	    --min-count=0 --max-count 45 \
-	    --aks-custom-headers UseGPUDedicatedVHD=true \
-	    --labels hub.jupyter.org/node-purpose=user hub.jupyter.org/pool-name=user-alpha-pool \
-	    --node-taints "hub.jupyter.org_dedicated=user:NoSchedule"
-
-	# User GPU pool
-	az aks nodepool add --name gpumanual \
-	    --cluster-name $(CLUSTER) \
-	    --resource-group $(GROUP) \
-	    --node-vm-size Standard_NC4as_T4_v3 \
-	    --node-count 0 \
-	    --aks-custom-headers UseGPUDedicatedVHD=true \
-	    --labels hub.jupyter.org/node-purpose=user hub.jupyter.org/pool-name=user-alpha-pool \
-	    --node-taints "hub.jupyter.org_dedicated=user:NoSchedule"
-
-	# Add a node-pool for Dask workers.
-	az aks nodepool add \
-		--name workers \
-		--cluster-name $(CLUSTER) \
-		--resource-group $(GROUP) \
-		--enable-cluster-autoscaler \
-		--node-count 1 \
-		--min-count 0 --max-count $(MAX_WORKER_NODE_COUNT) \
-		--node-vm-size Standard_D2s_v3 \
-		--priority Spot \
-		--eviction-policy Delete \
-		--spot-max-price -1 \
-		--labels="k8s.dask.org/dedicated=worker"
 	az aks get-credentials --name $(CLUSTER) --resource-group $(GROUP)
 
 storage:
@@ -134,7 +95,17 @@ scale:
 		--name=gpumanual \
 		--cluster-name=$(CLUSTER) \
 		--resource-group=$(GROUP) \
-		--node-count=$(NODE_COUNT)
+		--node-count=8
+	az aks nodepool scale \
+		--name=ncgpuuser \
+		--cluster-name=$(CLUSTER) \
+		--resource-group=$(GROUP) \
+		--node-count=32
+	az aks nodepool scale \
+		--name=cpumanual \
+		--cluster-name=$(CLUSTER) \
+		--resource-group=$(GROUP) \
+		--node-count=60
 
 ncscale:
 	az aks nodepool scale \
@@ -142,7 +113,6 @@ ncscale:
 		--cluster-name=$(CLUSTER) \
 		--resource-group=$(GROUP) \
 		--node-count=$(NODE_COUNT)
-
 
 clean:
 	az group delete -n $(GROUP)
