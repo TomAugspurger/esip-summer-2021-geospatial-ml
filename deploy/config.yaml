@@ -37,16 +37,6 @@ jupyterhub:
       guarantee: "12G"
       limit: "24G"
 
-    extraNodeAffinity:
-      preferred:
-        - weight: 1
-          preference:
-            matchExpressions:
-            - key: computetype
-              operator: In
-              values:
-              - gpu
-
     extraResource:
       # guarantees:
       #   nvidia.com/gpu: 1
